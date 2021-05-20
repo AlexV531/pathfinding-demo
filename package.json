@@ -1,0 +1,17 @@
+{
+  "name": "tile-map-2",
+  "version": "1.0.0",
+  "description": "Tile Map 2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "budo -p 3000 --dir public --wg **/*.{html,css,js} --live"
+  },
+  "keywords": [],
+  "author": "AlexV531",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "budo": "^11.6.3",
+    "eslint": "^6.1.0"
+  }
+}
