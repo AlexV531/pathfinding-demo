@@ -1,7 +1,6 @@
 import { loadAssets } from './assets.js'
 import { findPath } from './world/Pathfinding.js'
 import TileMap from './world/TileMap.js'
-import Heap from './util/Heap.js'
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.querySelector('canvas.main-canvas')
@@ -15,7 +14,7 @@ const viewport = {
 /** Scene scaling */
 const SCALE = 10.0
 /** Background */
-const BG_COLOR = '#0000FF'
+const BG_COLOR = '#000000'
 /** Radius of circle */
 const CIRCLE_RADIUS = 0.2
 const SPEED = 2 
@@ -28,6 +27,19 @@ const velocity = {
 let prevT = Date.now()
 /** Tile Map */
 let tileMap
+/** Pathfinding testers */
+let startTest = {
+	x:null, y:null
+}
+let targetTest = {
+	x:null, y:null
+}
+let mouse = {
+	x:0, y:0
+}
+let mouseTile = {
+	x:0, y:0
+}
 
 /** Handles initial canvas sizing, and all resizing thereafter */
 function resize() {
@@ -54,9 +66,6 @@ function handleKeyDown(e) {
 	if (code === 68) {
 		velocity.x = SPEED
 	}
-	if (code == 80) {
-		//tileMap.testPath(1, 1, 7, 8)
-	}
 } 
 
 /** @param {KeyboardEvent} e */
@@ -76,17 +85,59 @@ function handleKeyUp(e) {
 	}
 } 
 
+/** @param {MouseEvent} e */
+function handleMouseMove(e) {
+	mouse = {
+		x:(e.clientX - viewport.width / 2) / SCALE,
+		y:-(e.clientY - viewport.height / 2) / SCALE
+	}
+	mouseTile = {
+		x:Math.floor(mouse.x * tileMap.getTileWidth() / 2),
+		y:Math.floor(mouse.y * tileMap.getTileWidth() / 2)
+	}
+	if(e.shiftKey) {
+		tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
+	} else if(e.ctrlKey) {
+		tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = false
+	}
+}
+
+/** @param {MouseEvent} e */
+function handleClick(e) {
+	if(!(mouseTile.x < 0 || mouseTile.y < 0)) {
+		if(startTest.x === null) {
+			startTest.x = mouseTile.x
+			startTest.y = mouseTile.y
+			tileMap.start.x = mouseTile.x
+			tileMap.start.y = mouseTile.y
+			tileMap.testPath = []
+		} else if(targetTest.x === null) {
+			targetTest.x = mouseTile.x
+			targetTest.y = mouseTile.y
+			tileMap.testPath = findPath(tileMap, startTest.x, startTest.y, targetTest.x, targetTest.y)
+		} else {
+			startTest.x = mouseTile.x
+			startTest.y = mouseTile.y
+			tileMap.start.x = mouseTile.x
+			tileMap.start.y = mouseTile.y
+			tileMap.testPath = []
+			targetTest.x = null
+		}
+	}
+}
+
 /** Call this once on application startup */
 async function initApp() {
 	// Listen for window resize events
 	window.addEventListener('resize', resize)
 	window.addEventListener('keydown', handleKeyDown)
 	window.addEventListener('keyup', handleKeyUp)
-	//resize()
+	window.addEventListener('mousemove', handleMouseMove)
+	window.addEventListener('click', handleClick)
+
 	const assets = await loadAssets()
 	tileMap = new TileMap(10, 0.4, assets)
-	let path = findPath(tileMap, 1, 1, 4, 5)
-	console.log(path)
+	tileMap.testPath = findPath(tileMap, 1, 1, 4, 5)
 }
 
 /** Render the scene */
@@ -101,8 +152,7 @@ function render() {
 	context.save()
 	context.translate(viewport.width / 2, viewport.height / 2)
 	context.scale(viewport.width / SCALE, -viewport.width / SCALE)
-	
-	
+
 	// Draw the tile map
 	tileMap.render(context)
 

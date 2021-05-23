@@ -1,9 +1,8 @@
 import Tile from './Tile.js'
-import { findPath } from './Pathfinding.js'
 
-// This map currently only works for square layouts for testing
+// This map currently only works for square layouts for now
 export default class TileMap {
-    
+
 	constructor(size, tileWidth, tileHighlights) {
 		this.size = size
 		this.tileWidth = tileWidth
@@ -13,10 +12,12 @@ export default class TileMap {
 			for(var j = 0; j < size; j++) {
 				this.tileList[i][j] = new Tile(i, j, false)
 			}
-            
 		}
 		// This variable is temporary and is just used to test pathfinding
-		this.path = []
+		this.testPath = []
+		this.start = {
+			x:null, y:null
+		}
 	}
 
 	getTileWidth() {
@@ -41,28 +42,22 @@ export default class TileMap {
 
 	render(context) {
 		// This render is just to test pathfinding
+		console.log(this.testPath)
 		context.fillStyle = '#FFFFFF'
+		let imgIndex
 		for(let y = 0; y < this.size; y++) {
 			for(let x = 0; x < this.size; x++) {
-				// if(this.path.includes(this.getTileAt(x, y))) {
-				// 	context.drawImage(this.tileHighlights[2], x*this.tileWidth, y*this.tileWidth, this.tileWidth, this.tileWidth)
-				// } else {
-				// 	context.drawImage(this.tileHighlights[0], x*this.tileWidth, y*this.tileWidth, this.tileWidth, this.tileWidth)
-				// }
-				context.drawImage(this.tileHighlights[0], x*this.tileWidth, y*this.tileWidth, this.tileWidth, this.tileWidth)
+				if(this.testPath != null && this.testPath.includes(this.getTileAt(x, y))) {
+					imgIndex = 2
+				} else if(this.start.x === x && this.start.y === y) {
+					imgIndex = 3
+				} else if(this.getTileAt(x, y).isObstructed()) {
+					imgIndex = 1
+				} else {
+					imgIndex = 0
+				}
+				context.drawImage(this.tileHighlights[imgIndex], x*this.tileWidth, y*this.tileWidth, this.tileWidth, this.tileWidth)
 			}
-		}
-	}
-
-	// Just to test pathfinding
-	testPath(startX, startY, targetX, targetY) {
-		if(startX === this.pathCoords[0] && startY === this.pathCoords[1] && targetX === this.pathCoords[2] && targetY === this.pathCoords[3]) {
-			return
-		} else {
-			this.path = findPath(this, startX, startY, targetX, targetY)
-			this.pathCoords = [
-				startX, startY, targetX, targetY
-			]
 		}
 	}
 

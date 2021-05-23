@@ -31,30 +31,18 @@ function retracePath(startTile, endTile) {
 	return path
 }
 
-export async function findPath(tileMap, startX, startY, targetX, targetY) {
+export function findPath(tileMap, startX, startY, targetX, targetY) {
 	let startTile = tileMap.getTileAt(startX, startY)
 	let targetTile = tileMap.getTileAt(targetX, targetY)
 
 	let open = new Heap()
-	//let open = []
 	let closed = []
 
 	open.add(startTile, startTile.getFCost())
-	//open.push(startTile)
-
 	//console.log("Reached findPath")
 
 	while(open.size() > 0) {
 		//console.log("Reached while")
-		// let currentTile = open[0]
-		// let newIndex = 0
-		// for(let j = 0; j < open.length; j++) {
-		// 	if(open[j].getFCost() < currentTile.getFCost() || (open[j].getFCost() == currentTile.getFCost() && open[j].hCost < currentTile.hCost)) {
-		// 		currentTile = open[j]
-		// 		newIndex = j
-		// 	}
-		// }
-		// open.splice(newIndex, 1)
 		let currentTile = open.remove()
 		closed.push(currentTile)
 		//console.log(closed.includes(tileMap.getTileAt(startX, startY)))
@@ -80,7 +68,6 @@ export async function findPath(tileMap, startX, startY, targetX, targetY) {
 
 				if(!open.includes(neighbors[i])) {
 					open.add(neighbors[i], neighbors[i].getFCost())
-					//open.push(neighbors[i])
 				}
 			}
 		}

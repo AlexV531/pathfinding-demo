@@ -2,7 +2,8 @@
 const tileHighlightList = [
 	"img/selected-tile-grey.png",
 	"img/selected-tile-red.png",
-	"img/selected-tile-green.png"
+	"img/selected-tile-green.png",
+	"img/selected-tile-blue.png"
 ]
 const tileHighlights = []
 
