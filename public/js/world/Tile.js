@@ -1,27 +1,28 @@
 export default class Tile {
 
-    constructor(x, y, obstructed) {
-        this.x = x
-        this.y = y
-        // gCost and hCost will be set during the pathfinding algorithm and do not need to be set on creation
-        this.gCost = 0
-        this.hCost = 0
-        this.obstructed = obstructed
-    }
+	constructor(x, y, obstructed) {
+		this.x = x
+		this.y = y
+		this.obstructed = obstructed
+		// gCost, hCost and parent will be set during the pathfinding algorithm and do not need to be set on creation
+		this.gCost = 0
+		this.hCost = 0
+		this.parent = null
+	}
 
-    getX = function() {
-        return this.x
-    }
+	getX() {
+		return this.x
+	}
 
-    getY = function() {
-        return this.y
-    }
+	getY() {
+		return this.y
+	}
 
-    isObstructed = function() {
-        return this.obstructed
-    }
+	isObstructed() {
+		return this.obstructed
+	}
 
-    getFCost = function() {
-        return this.gCost + this.hCost
-    }
+	getFCost() {
+		return this.gCost + this.hCost
+	}
 }
