@@ -32,12 +32,35 @@ function retracePath(startTile, endTile) {
 }
 
 export function findPath(tileMap, startX, startY, targetX, targetY) {
-	let startTile = tileMap.getTileAt(startX, startY)
-	let targetTile = tileMap.getTileAt(targetX, targetY)
+	// let startTiles = []
+	// if(startX % 1 != 0 || startY % 1 != 0) {
+	// 	startTiles.add(tileMap.getTileAt(Math.floor(startX), Math.floor(startY)))
+	// }
 
 	let open = new Heap()
 	let closed = []
 
+	let startTile
+	let targetTile = tileMap.getTileAt(targetX, targetY)
+
+	if(startX % 1 === 0 || startY % 1 === 0) {
+		startTile = tileMap.getTileAt(startX, startY)
+		open.add(startTile, 0)
+	} else {
+		for(let i = 0; i < 4; i++) {
+			let tileX = Math.floor(startX) + Math.floor(i/2)
+			let tileY = Math.floor(startY) + i % 2
+			let currentTile = tileMap.getTileAt(tileX, tileY)
+			if(tileX > tileMap.getMapSizeX() - 1 || tileY > tileMap.getMapSizeX() - 1) {
+				continue
+			} else if(!currentTile.isObstructed()) {
+				currentTile.gCost = 10 * Math.sqrt((startX-tileX)**2 + (startY-tileY)**2)
+				currentTile.hCost = tileMap.getDistance(currentTile, targetTile)
+				open.add(currentTile, currentTile.getFCost())
+			}
+		}
+	}
+	
 	open.add(startTile, startTile.getFCost())
 	//console.log("Reached findPath")
 

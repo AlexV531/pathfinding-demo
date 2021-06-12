@@ -88,12 +88,12 @@ function handleKeyUp(e) {
 /** @param {MouseEvent} e */
 function handleMouseMove(e) {
 	mouse = {
-		x:(e.clientX - viewport.width / 2) / SCALE,
-		y:-(e.clientY - viewport.height / 2) / SCALE
+		x:(e.clientX - viewport.width / 2) / (viewport.width / SCALE),
+		y:-(e.clientY - viewport.height / 2) / (viewport.width / SCALE)
 	}
 	mouseTile = {
-		x:Math.floor(mouse.x * tileMap.getTileWidth() / 2),
-		y:Math.floor(mouse.y * tileMap.getTileWidth() / 2)
+		x:Math.floor(mouse.x / tileMap.getTileWidth()),
+		y:Math.floor(mouse.y / tileMap.getTileWidth())
 	}
 	if(e.shiftKey) {
 		tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
@@ -137,7 +137,6 @@ async function initApp() {
 
 	const assets = await loadAssets()
 	tileMap = new TileMap(10, 0.4, assets)
-	tileMap.testPath = findPath(tileMap, 1, 1, 4, 5)
 }
 
 /** Render the scene */
@@ -152,14 +151,20 @@ function render() {
 	context.save()
 	context.translate(viewport.width / 2, viewport.height / 2)
 	context.scale(viewport.width / SCALE, -viewport.width / SCALE)
+	context.getTransform()
 
 	// Draw the tile map
 	tileMap.render(context)
+
+	//console.log(mouse.x + " | " + mouse.y)
 
 	// Draw a circle and rectangle
 	context.beginPath()
 	context.fillStyle = '#FF0000'
 	context.arc(position.x, position.y, CIRCLE_RADIUS, 0, Math.PI * 2)
+	context.fill()
+
+	context.rect(2, 3, 1, 1, 1) 
 	context.fill()
 
 	context.restore()

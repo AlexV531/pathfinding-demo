@@ -42,7 +42,7 @@ export default class TileMap {
 
 	render(context) {
 		// This render is just to test pathfinding
-		console.log(this.testPath)
+		//console.log(this.testPath)
 		context.fillStyle = '#FFFFFF'
 		let imgIndex
 		for(let y = 0; y < this.size; y++) {
