@@ -7,11 +7,14 @@ const tileHighlightList = [
 ]
 const tileHighlights = []
 
+const testSpriteImg = "img/test-sprite.png"
+
 export async function loadAssets() {
 	for(let i = 0; i < tileHighlightList.length; i++) {
 		tileHighlights.push(await loadImage(tileHighlightList[i]))
 	}
-	return tileHighlights
+	let testSprite = await loadImage(testSpriteImg)
+	return [tileHighlights, testSprite]
 }
 
 /** @returns {Promise<HTMLImageElement>} */

@@ -1,6 +1,11 @@
 import { loadAssets } from './assets.js'
+import SpriteComponent from './components/SpriteComponent.js'
+import TestComponent from './components/TestComponent.js'
+import MoveComponent from './components/MoveComponent.js'
+import GameObject from './GameObject.js'
 import { findPath } from './world/Pathfinding.js'
 import TileMap from './world/TileMap.js'
+import { pos, initCamera, updateCamera,  } from './Camera.js'
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.querySelector('canvas.main-canvas')
@@ -19,7 +24,7 @@ const BG_COLOR = '#000000'
 const CIRCLE_RADIUS = 0.2
 const SPEED = 2 
 const position = {
-	x:0, y:0
+	x:1.4, y:1.4
 }
 const velocity = {
 	x:0, y:0
@@ -41,6 +46,11 @@ let mouseTile = {
 	x:0, y:0
 }
 
+let testObject
+let testOnce = true
+
+let count = 0
+
 /** Handles initial canvas sizing, and all resizing thereafter */
 function resize() {
 	// Whenever the window is resized we need to update
@@ -53,7 +63,7 @@ function resize() {
 
 /** @param {KeyboardEvent} e */
 function handleKeyDown(e) {
-	const code = e.keyCode 
+	let code = e.keyCode 
 	if(code === 87) {
 		velocity.y = SPEED
 	}
@@ -70,7 +80,7 @@ function handleKeyDown(e) {
 
 /** @param {KeyboardEvent} e */
 function handleKeyUp(e) {
-	const code = e.keyCode 
+	let code = e.keyCode 
 	if(code === 87) {
 		velocity.y = 0
 	} 
@@ -88,23 +98,35 @@ function handleKeyUp(e) {
 /** @param {MouseEvent} e */
 function handleMouseMove(e) {
 	mouse = {
-		x:(e.clientX - viewport.width / 2) / (viewport.width / SCALE),
-		y:-(e.clientY - viewport.height / 2) / (viewport.width / SCALE)
+		x:(e.clientX - pos.x) / (viewport.width / SCALE),
+		y:-(e.clientY + pos.y - viewport.height) / (viewport.width / SCALE)
 	}
 	mouseTile = {
 		x:Math.floor(mouse.x / tileMap.getTileWidth()),
 		y:Math.floor(mouse.y / tileMap.getTileWidth())
 	}
 	if(e.shiftKey) {
-		tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
+		//tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
 	} else if(e.ctrlKey) {
-		tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = false
+		//tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = false
 	}
 }
 
 /** @param {MouseEvent} e */
 function handleClick(e) {
-	if(!(mouseTile.x < 0 || mouseTile.y < 0)) {
+	if(!(mouseTile.x < 0 || mouseTile.y < 0 || mouseTile.x > tileMap.getMapSizeX() || mouseTile.y > tileMap.getMapSizeY())) {
+		if(e.shiftKey) {
+			testObject.getComponent(MoveComponent).move(mouseTile.x, mouseTile.y)
+			return
+		}
+		if(e.ctrlKey) {
+			if(tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed) {
+				tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = false
+			} else {
+				tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
+			}
+			return
+		}
 		if(startTest.x === null) {
 			startTest.x = mouseTile.x
 			startTest.y = mouseTile.y
@@ -135,8 +157,14 @@ async function initApp() {
 	window.addEventListener('mousemove', handleMouseMove)
 	window.addEventListener('click', handleClick)
 
+	initCamera()
+
 	const assets = await loadAssets()
-	tileMap = new TileMap(10, 0.4, assets)
+	tileMap = new TileMap(20, 0.4, assets[0])
+	let testComponent = new TestComponent()
+	let spriteComponent = new SpriteComponent(assets[1])
+	let moveComponent = new MoveComponent(tileMap)
+	testObject = new GameObject("test", 2, 2, [testComponent, spriteComponent, moveComponent])
 }
 
 /** Render the scene */
@@ -149,7 +177,8 @@ function render() {
 	// Set up a cartesian-style coordinate system with 0,0
 	// at the centre of the screen, and Y axis up.
 	context.save()
-	context.translate(viewport.width / 2, viewport.height / 2)
+	context.translate(pos.x, viewport.height - pos.y)
+	//console.log(viewport.height)
 	context.scale(viewport.width / SCALE, -viewport.width / SCALE)
 	context.getTransform()
 
@@ -157,14 +186,12 @@ function render() {
 	tileMap.render(context)
 
 	//console.log(mouse.x + " | " + mouse.y)
+	testObject.render(context)
 
 	// Draw a circle and rectangle
 	context.beginPath()
 	context.fillStyle = '#FF0000'
 	context.arc(position.x, position.y, CIRCLE_RADIUS, 0, Math.PI * 2)
-	context.fill()
-
-	context.rect(2, 3, 1, 1, 1) 
 	context.fill()
 
 	context.restore()
@@ -175,11 +202,23 @@ function update() {
 	const curT = Date.now()
 	const deltaT = curT - prevT
 	const fT = deltaT/1000
+
+	updateCamera(deltaT)
+
 	//position.x = position.x + fT * 1
 	//position.x = Math.tan(curT/1000)
 	//position.y = Math.sin(curT/1000) + Math.sin(curT/100)
 	position.x += velocity.x * fT
 	position.y += velocity.y * fT
+	
+	testObject.update(deltaT)
+
+	if(testOnce) {
+
+		//testObject.getComponent(MoveComponent).move(9, 11)
+
+		testOnce = false
+	}
 
 	prevT = curT
 	render()
