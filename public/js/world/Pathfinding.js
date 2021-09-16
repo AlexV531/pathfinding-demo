@@ -48,7 +48,7 @@ export function findPath(tileMap, startX, startY, targetX, targetY) {
 
 		// If the tile is the target, return the path
 		if(currentTile === targetTile) {
-			return retracePath(startTiles, targetTile)
+			return retracePath(startTiles, targetTile, tileMap)
 		}
 
 		// Finds all the neighboring tiles directly ajacent or diagonal to the tile
@@ -107,7 +107,7 @@ function getNeigbors(tileMap, tile) {
 }
 
 // Returns the path as a list of tiles going from the start tile to the target tile
-function retracePath(startTiles, endTile) {
+function retracePath(startTiles, endTile, tileMap) {
 	let path = []
 	let currentTile = endTile
 	while(!startTiles.includes(currentTile)) {
@@ -115,5 +115,7 @@ function retracePath(startTiles, endTile) {
 		currentTile = currentTile.parent
 	}
 	path.unshift(currentTile)
+	// For visualization purposes
+	//tileMap.testPath = path
 	return path
 }

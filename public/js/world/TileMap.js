@@ -37,11 +37,14 @@ export default class TileMap {
 	}
 
 	getTileAt(x, y) {
-		return this.tileList[x][y]
+		if(!((0 > x || x > this.size - 1) || (0 > y || y > this.size - 1))) {
+			return this.tileList[x][y]
+		}
+		return 
 	}
 
 	render(context) {
-		// This render is just to test pathfinding
+		// This render is just to visualize pathfinding
 		context.fillStyle = '#FFFFFF'
 		let imgIndex
 		for(let y = 0; y < this.size; y++) {

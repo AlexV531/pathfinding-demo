@@ -1,7 +1,7 @@
 export let pos = {
 	x:0, y:0
 }
-const maxSpeed = 0.2
+const maxSpeed = 0.4
 let speed = {
 	left:0, right:0,
 	up:0, down:0

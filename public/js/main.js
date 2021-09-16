@@ -16,20 +16,12 @@ const viewport = {
 	width: 320, height: 240 // These will be determined later..
 }
 
+let prevT = Date.now()
+
 /** Scene scaling */
 const SCALE = 10.0
 /** Background */
 const BG_COLOR = '#000000'
-/** Radius of circle */
-const CIRCLE_RADIUS = 0.2
-const SPEED = 2 
-const position = {
-	x:1.4, y:1.4
-}
-const velocity = {
-	x:0, y:0
-}
-let prevT = Date.now()
 /** Tile Map */
 let tileMap
 /** Pathfinding testers */
@@ -39,17 +31,20 @@ let startTest = {
 let targetTest = {
 	x:null, y:null
 }
+/** Mouse position */
 let mouse = {
 	x:0, y:0
 }
 let mouseTile = {
 	x:0, y:0
-}
+}//** Obstruction variables */
+let placeObstruction = false
+let removeObstruction = false
 
 let testObject
 let testOnce = true
 
-let count = 0
+//let count = 0
 
 /** Handles initial canvas sizing, and all resizing thereafter */
 function resize() {
@@ -64,34 +59,22 @@ function resize() {
 /** @param {KeyboardEvent} e */
 function handleKeyDown(e) {
 	let code = e.keyCode 
-	if(code === 87) {
-		velocity.y = SPEED
+	if (code === 90) {
+		placeObstruction = true
 	}
-	if (code === 83) {
-		velocity.y = -SPEED
-	} 
-	if (code === 65) {
-		velocity.x = -SPEED
-	} 
-	if (code === 68) {
-		velocity.x = SPEED
+	if (code === 88) {
+		removeObstruction = true
 	}
 } 
 
 /** @param {KeyboardEvent} e */
 function handleKeyUp(e) {
 	let code = e.keyCode 
-	if(code === 87) {
-		velocity.y = 0
-	} 
-	if (code === 83) {
-		velocity.y = 0
-	} 
-	if (code === 65) {
-		velocity.x = 0
-	} 
-	if (code === 68) {
-		velocity.x = 0
+	if (code === 90) {
+		placeObstruction = false
+	}
+	if (code === 88) {
+		removeObstruction = false
 	}
 } 
 
@@ -105,28 +88,17 @@ function handleMouseMove(e) {
 		x:Math.floor(mouse.x / tileMap.getTileWidth()),
 		y:Math.floor(mouse.y / tileMap.getTileWidth())
 	}
-	if(e.shiftKey) {
-		//tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
-	} else if(e.ctrlKey) {
-		//tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = false
-	}
 }
 
 /** @param {MouseEvent} e */
 function handleClick(e) {
 	if(!(mouseTile.x < 0 || mouseTile.y < 0 || mouseTile.x > tileMap.getMapSizeX() || mouseTile.y > tileMap.getMapSizeY())) {
+		// Move player
 		if(e.shiftKey) {
 			testObject.getComponent(MoveComponent).move(mouseTile.x, mouseTile.y)
 			return
 		}
-		if(e.ctrlKey) {
-			if(tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed) {
-				tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = false
-			} else {
-				tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
-			}
-			return
-		}
+		// Pathfinding tester
 		if(startTest.x === null) {
 			startTest.x = mouseTile.x
 			startTest.y = mouseTile.y
@@ -188,12 +160,6 @@ function render() {
 	//console.log(mouse.x + " | " + mouse.y)
 	testObject.render(context)
 
-	// Draw a circle and rectangle
-	context.beginPath()
-	context.fillStyle = '#FF0000'
-	context.arc(position.x, position.y, CIRCLE_RADIUS, 0, Math.PI * 2)
-	context.fill()
-
 	context.restore()
 }
 
@@ -204,19 +170,18 @@ function update() {
 	const fT = deltaT/1000
 
 	updateCamera(deltaT)
-
-	//position.x = position.x + fT * 1
-	//position.x = Math.tan(curT/1000)
-	//position.y = Math.sin(curT/1000) + Math.sin(curT/100)
-	position.x += velocity.x * fT
-	position.y += velocity.y * fT
 	
+	if(placeObstruction) {
+		console.log("hello")
+		tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = true
+	}
+	else if(removeObstruction) {
+		tileMap.getTileAt(mouseTile.x, mouseTile.y).obstructed = false
+	}
+
 	testObject.update(deltaT)
 
 	if(testOnce) {
-
-		//testObject.getComponent(MoveComponent).move(9, 11)
-
 		testOnce = false
 	}
 
