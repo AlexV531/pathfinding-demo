@@ -28,14 +28,15 @@ export default class MoveComponent extends Component {
 			return
 		}
 
+		// Checks if the path is not null before replacing the original path
+		let tempPath = findPath(this.tileMap, this.curr.x, this.curr.y, x, y)
+		if(tempPath === null) {
+			return
+		}
+		this.path = tempPath
+
 		this.target = {
 			x:x, y:y
-		}
-
-		// Finds path to target
-		this.path = findPath(this.tileMap, this.curr.x, this.curr.y, x, y)
-		if(this.path === null) {
-			return
 		}
 
 		// Finds next node in path
